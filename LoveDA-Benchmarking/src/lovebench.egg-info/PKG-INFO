@@ -1,0 +1,10 @@
+Metadata-Version: 2.2
+Name: lovebench
+Version: 0.1.0
+Requires-Dist: torch>=1.12
+Requires-Dist: torchvision>=0.13
+Requires-Dist: torchgeo>=0.4
+Requires-Dist: pytorch_lightning>=2.0
+Requires-Dist: numpy>=1.21
+Requires-Dist: tqdm>=4.64
+Dynamic: requires-dist
