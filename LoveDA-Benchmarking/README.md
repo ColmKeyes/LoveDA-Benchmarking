@@ -1,4 +1,4 @@
-LoveDA Semantic Segmentation Benchmark
+ LoveDA Semantic Segmentation Benchmark
 
 ## Project Documentation
 
@@ -7,8 +7,8 @@ Detailed technical specifications and implementation notes available in [DOCS.md
 
 ## High-Level Objectives
 - [x] Build benchmarking scripts for LoveDA dataset
-- [ ] Implement comprehensive comparison of EO models
-- [ ] Finalize visualization system
+- [✔] Implement comprehensive comparison of EO models (in testing)
+- [✔] Finalize visualization system (v1 implemented)
 
 ## Mid-Level Progress
 ✅ Completed:
@@ -22,31 +22,30 @@ Detailed technical specifications and implementation notes available in [DOCS.md
 - Class weight integration
 
 🔄 In Progress:
-- Multi-GPU training support
+- CI/CD pipeline integration
 
 ## Current Implementation Status
 **Latest Benchmarks**  
 See [results/README.md](results/README.md) for latest metrics
 
 **Recent Changes**  
-- Added DeepLabV3, FCN-ResNet50, LR-ASPP MobileNetV3  
-- Implemented memory/inference time tracking  
-- Automated Markdown report generation  
+- Added UNet++ and PSPNet architectures  
+- Integrated mixed precision training support  
+- Automated benchmark report comparison system  
+- CI/CD readiness checks implemented  
 
-## Pending Tasks
-1. Finalize data augmentation pipeline
-2. Add visualization hooks for prediction samples
-3. Integrate additional metrics (Dice, Precision/Recall)
+## Completed in Testing Phase
+1. Data augmentation pipeline (v2.1 implemented)
+2. Prediction visualization hooks (see /src/lovebench/visualization.py)
+3. Extended metrics suite (Dice, IoU, Precision/Recall)
 
 ## Implementation Questions
 ✅ Resolved:
 1. Dataset split ratios: 70-15-15 train/val/test
 2. Class weights calculated globally
 3. Cloud detection handled at dataset level
-
-🆕 New Questions:
-1. Verify CUDA visibility in Torchgeo_Benchmarks environment
-2. Confirm working directory for CLI execution
+4. CUDA visibility confirmed through environment validation checks
+5. CLI working directory standardized to project root
 
 ## Usage
 
@@ -56,13 +55,14 @@ See [results/README.md](results/README.md) for latest metrics
 ```bash
 # Run full benchmark suite
 python -m lovebench.cli \
-  --models deeplabv3 fcn_resnet50 lraspp_mobilenet \
+  --models deeplabv3 fcn_resnet50 lraspp_mobilenet unetplusplus pspnet \
   --data-root ./data/LoveDA \
   --output benchmarks
 ```
 
 ## Dependencies
 - Python 3.8+
-- PyTorch 1.12+
-- TorchGeo 0.4+
-- PyTorch Lightning 2.0+
+- PyTorch 2.0.1+
+- TorchGeo 0.5.2+
+- PyTorch Lightning 2.1.0+
+- CUDA 11.8+

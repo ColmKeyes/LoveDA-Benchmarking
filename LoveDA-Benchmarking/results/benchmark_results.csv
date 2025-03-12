@@ -1,0 +1,2 @@
+Model,Input Size,mIoU,Inference Time (ms),Memory Usage (GB),Date
+unet,512,,tensor(nan),0.0,2025-03-03

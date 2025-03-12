@@ -63,7 +63,7 @@ class SegmentationModel(LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
+        x, y = batch['image'], batch['mask']
         y_hat = self(x)
         loss = self.criterion(y_hat, y.long())
         
@@ -75,7 +75,7 @@ class SegmentationModel(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
+        x, y = batch['image'], batch['mask']
         y_hat = self(x)
         loss = self.criterion(y_hat, y.long())
         
@@ -97,30 +97,37 @@ class SegmentationModel(LightningModule):
         ious = []
         
         with torch.no_grad():
-            for x, y in dataloader:
-                x, y = x.to(device), y.to(device)
+            for batch in dataloader:
+                x, y = batch['image'].to(device), batch['mask'].to(device)
                 
                 # Timing and memory measurement
                 start_event = torch.cuda.Event(enable_timing=True)
                 end_event = torch.cuda.Event(enable_timing=True)
                 
-                torch.cuda.synchronize()
-                start_event.record()
+                if device.type == 'cuda':
+                    torch.cuda.synchronize()
+                    start_event.record()
+                
                 outputs = self(x)
-                end_event.record()
-                torch.cuda.synchronize()
+                
+                if device.type == 'cuda':
+                    end_event.record()
+                    torch.cuda.synchronize()
+                    self.inference_times.append(start_event.elapsed_time(end_event))
+                    self.memory_usage.append(torch.cuda.max_memory_allocated())
                 
                 # Calculate metrics
                 preds = torch.argmax(outputs, dim=1)
                 ious.append(self.val_iou(preds, y))
-                
-                # Record resources
-                self.inference_times.append(start_event.elapsed_time(end_event))
-                if torch.cuda.is_available():
-                    self.memory_usage.append(torch.cuda.max_memory_allocated(device))
 
-        return {
-            "mean_iou": torch.mean(torch.tensor(ious)),
-            "mean_inference_time": torch.mean(torch.tensor(self.inference_times)),
-            "peak_memory_usage": torch.max(torch.tensor(self.memory_usage)) if self.memory_usage else 0
-        }
+        # Calculate final metrics
+        mean_iou = torch.mean(torch.tensor(ious))
+        metrics = {"mean_iou": mean_iou}
+        
+        if device.type == 'cuda':
+            metrics.update({
+                "mean_inference_time": torch.mean(torch.tensor(self.inference_times)),
+                "peak_memory_usage": torch.max(torch.tensor(self.memory_usage))
+            })
+        
+        return metrics
